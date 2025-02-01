@@ -14,11 +14,11 @@ class FileHelp:
         try:
             # Check if path exists.
             if not os.path.exists(path):
-                raise Exception("File not found, please check the path and try again.")
+                raise Exception('File not found, please check the path and try again.')
 
             # Listing the file attributes.
             result = subprocess.run(
-                ["lsattr", path],
+                ['lsattr', path],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 text=True,
@@ -26,11 +26,11 @@ class FileHelp:
             )
 
             # If the file has 'i' attribute, it means that is locked for writing.
-            return "i" in result.stdout[:21]
+            return 'i' in result.stdout[:21]
 
-        except Exception as err:
+        except Exception:
             # TODO: adding logs
-            print("Could not check status of the file: {err}")
+            print('Could not check status of the file: {err}')
             return False
 
     @classmethod
@@ -41,11 +41,11 @@ class FileHelp:
         try:
             # Check if path exists.
             if not os.path.exists(path):
-                raise Exception("File not found, please check the path and try again.")
+                raise Exception('File not found, please check the path and try again.')
 
             # Modify the file attribute.
-            result = subprocess.run(
-                ["sudo", "chattr", "+i", path],
+            subprocess.run(
+                ['sudo', 'chattr', '+i', path],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 text=True,
@@ -53,9 +53,9 @@ class FileHelp:
             )
             return True
 
-        except Exception as err:
+        except Exception:
             # TODO: adding loggin
-            print("Could not change the file attribute: {err}")
+            print('Could not change the file attribute: {err}')
             return False
 
     @classmethod
@@ -66,11 +66,11 @@ class FileHelp:
         try:
             # Check if path exists.
             if not os.path.exists(path):
-                raise Exception("File not found, please check the path and try again.")
+                raise Exception('File not found, please check the path and try again.')
 
             # Modify the file attribute.
             subprocess.run(
-                ["sudo", "chattr", "-i", path],
+                ['sudo', 'chattr', '-i', path],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 text=True,
@@ -78,13 +78,28 @@ class FileHelp:
             )
             return True
 
-        except Exception as err:
+        except Exception:
             # TODO: adding loggin
-            print("Could not change the file attribute: {err}")
+            print('Could not change the file attribute: {err}')
+            return False
+
+    @classmethod
+    def write(cls, path: str, data: str) -> bool:
+        try:
+            if cls.is_blocked(path):
+                cls.unblock(path)
+
+            with open(path, 'w') as file:
+                file.write(data)
+            cls.block(path)
+            return True
+
+        except Exception as err:
+            print(f'Error: {err}')
             return False
 
 
-if __name__ == "__main__":
-    print(FileHelp.is_blocked("/etc/resolv.conf"))
-    FileHelp.block("/etc/resolv.conf")
-    print(FileHelp.is_blocked("/etc/resolv.conf"))
+if __name__ == '__main__':
+    print(FileHelp.is_blocked('/etc/resolv.conf'))
+    FileHelp.block('/etc/resolv.conf')
+    print(FileHelp.is_blocked('/etc/resolv.conf'))
