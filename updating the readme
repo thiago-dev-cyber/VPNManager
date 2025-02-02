@@ -5,9 +5,10 @@ This stupid script aims to manage the initialization of a VPN randomly, includin
 ### Implemented Features
 
 - [x]  **File Help**: Class to assist the file manegement.
+- [x]  **MAC Randomization**: Set a new MAC address before starting the connection with the VPN servers.
+- [x]  **Vpn Help**: Class to assist the vpn config manegement.
 
 ### Features in Development
 
-- [ ]  **MAC Randomization**: Set a new MAC address before starting the connection with the VPN servers.
-- [ ]  **Vpn Help**: Class to assist the vpn config manegement.
-
+- [ ] **Installerr**: Create an installer for the script.
+- [ ] **Daemon Config**: Configure the daemon.
