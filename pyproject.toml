@@ -1,0 +1,41 @@
+[project]
+name = "vpnmanager"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.4",
+]
+
+[project.urls]
+# Documentation = "https://thiago-dev-cyber.github.io/mosheh/"
+Repository = "https://github.com/thiago-dev-cyber/VPNManager"
+Issues = "https://github.com/thiago-dev-cyber/VPNManager/issues"
+# Changelog = "https://thiago-dev-cyber.github.io/mosheh/CHANGELOG"
+
+
+[tool.ruff]
+line-length = 88
+exclude = [".env", ".venv", "uv.lock", ".github", "pyproject.toml"]
+fix = true
+
+
+[tool.ruff.format]
+quote-style = "single"
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["I", "E", "UP", "F"]
+fixable = ["ALL"]
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+lines-after-imports = 2
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F821"]
+"**/{tests,docs,tools}/*" = ["E402"]
