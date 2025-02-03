@@ -17,9 +17,10 @@ class VpnHelp:
         self.is_active = False
         self.auth_file: Optional[str] = None
         self.config_file: Optional[str] = None
-        self.system_dns: List[str] = []
-        self.vpn_dns: List[str] = ['1.1.1.1', '8.8.4.4']
+        self.system_dns: List[str] = ['127.0.2.1']
+        self.vpn_dns: List[str] = ['1.1.1.1', '8.8.4.4\n']
         self.openvpn_process: Optional[subprocess.Popen] = None
+        self.server_pool = []
 
     def _generate_vendor_mac(self) -> str:
         """Generates a MAC address using known vendor OUIs"""
@@ -34,15 +35,15 @@ class VpnHelp:
             'A4:4C:C8',  # Intel
         ]
         oui = random.choice(VENDOR_OUI)
-        [random.randint(0x00, 0xFF) for _ in range(3)]
+        random_part = [random.randint(0x00, 0xFF) for _ in range(3)]
         mac = (
             f'{oui}:',
-            '{random_part[0]:02X}',
-            ':{random_part[1]:02X}',
-            ':{random_part[2]:02X}'.lower(),
+            f'{random_part[0]:02X}',
+            f':{random_part[1]:02X}',
+            f':{random_part[2]:02X}'.lower(),
         )
 
-        return mac
+        return ''.join(mac)
 
     def __get_network_interfaces(self) -> List[str]:
         """Filters only relevant physical interfaces"""
@@ -241,7 +242,7 @@ class VpnHelp:
                 if self.check_internet_connection():
                     print('VPN started successfully.')
                     self.is_active = True
-                    return True
+                    return self.openvpn_process
                 else:
                     self.stop()
                     raise ConnectionError('VPN connection failed.')
@@ -288,3 +289,27 @@ class VpnHelp:
 
         self.is_active = False
         print('VPN stopped.')
+
+
+    def _get_random_server(self, path:str):
+        try:
+            if not os.path.exists(path) or not os.path.isdir(path):
+                raise FileNotFoundError("Directory not found, check the path entered")
+
+            if not self.server_pool:
+                servers = []
+
+                for serve in os.listdir(path):
+                    full_path = os.path.join(path, serve)
+                    if os.path.isfile(full_path):
+                        servers.append(full_path)
+
+                self.server_pool = servers
+
+            server_file = random.choice(self.server_pool)
+            return server_file
+
+
+        except Exception as err:
+            print(err)
+            
