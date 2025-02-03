@@ -3,10 +3,10 @@ import sys
 
 
 CURRENTDIR = os.path.dirname(os.path.abspath(__file__))
-CONFIG_DIR = '/etc/vpnmmanager'
+CONFIG_DIR = '/etc/vpnmanager'
 SERVERS_DIR = os.path.join(CONFIG_DIR, 'servers')
-AUTH_FILE = '/etc/vpnmmanager/auth.txt'
-PID_FILE = '/var/run/vpnmmanager.pid'
+AUTH_FILE = '/etc/vpnmanager/auth.txt'
+PID_FILE = '/var/run/vpnmanager.pid'
 
 sys.path.append(CURRENTDIR)
 os.environ['ROOT'] = CURRENTDIR
