@@ -2,10 +2,18 @@ import random
 import subprocess
 import time
 
+
 class NetworkManager:
+    """
+    Class to assist with tasks related to network management.
+    """
+
     @staticmethod
     def _generate_vendor_mac() -> str:
-        """Generates a MAC address using known vendor OUIs"""
+        """
+        Generates a MAC address using known vendor OUIs
+        """
+
         # List of common virtual machine and device OUIs
         VENDOR_OUI = [
             '00:0C:29',  # VMware
@@ -17,7 +25,9 @@ class NetworkManager:
             'A4:4C:C8',  # Intel
         ]
         oui = random.choice(VENDOR_OUI)
+
         random_part = [random.randint(0x00, 0xFF) for _ in range(3)]
+
         mac = (
             f'{oui}:',
             f'{random_part[0]:02X}',
@@ -28,8 +38,10 @@ class NetworkManager:
         return ''.join(mac)
 
     @staticmethod
-    def __get_network_interfaces() -> list:
-        """Filters only relevant physical interfaces"""
+    def _get_network_interfaces() -> list:
+        """
+        Filters only relevant physical interfaces
+        """
         try:
             result = subprocess.run(
                 ['ip', '-o', 'link', 'show'], capture_output=True, text=True, check=True
@@ -51,10 +63,11 @@ class NetworkManager:
             print(f'Error getting interfaces: {e}')
             return []
 
-
     @staticmethod
-    def __restart_network():
-        """Restarts network services to ensure new MAC application"""
+    def _restart_network():
+        """
+        Restarts network services to ensure new MAC application
+        """
         try:
             subprocess.run(
                 ['sudo', 'systemctl', 'restart', 'NetworkManager'], check=True
@@ -63,10 +76,15 @@ class NetworkManager:
         except subprocess.CalledProcessError as e:
             print(f'Warning: Failed to restart NetworkManager: {e}')
 
-
     @staticmethod
-    def __renew_dhcp(interface: str):
-        """Attempts to renew DHCP lease"""
+    def _renew_dhcp(interface: str):
+        """
+        Attempts to renew DHCP lease
+
+        Args:
+
+            interface (str): Name from Inteface e.g eth1
+        """
         try:
             subprocess.run(['sudo', 'dhclient', '-r', interface], check=True)
             subprocess.run(['sudo', 'dhclient', interface], check=True)
@@ -75,12 +93,19 @@ class NetworkManager:
         except subprocess.CalledProcessError as e:
             print(f'Error renewing DHCP: {e}')
 
-
     @staticmethod
     def new_mac_address(max_attempts: int = 5, wait_time: int = 10) -> bool:
-        """Improved implementation for MAC address rotation"""
+        """
+        Improved implementation for MAC address rotation
+
+        Args:
+
+            max_attempts (int): Maximum number of attempts
+
+            wait_time (int): Maximum number of seconds which script will wait.
+        """
         try:
-            interfaces = self.__get_network_interfaces()
+            interfaces = NetworkManager._get_network_interfaces()
             if not interfaces:
                 print('No suitable network interfaces found!')
                 return False
@@ -89,7 +114,7 @@ class NetworkManager:
                 print(f'Working on interface: {interface}')
 
                 for attempt in range(1, max_attempts + 1):
-                    new_mac = self._generate_vendor_mac()
+                    new_mac = NetworkManager._generate_vendor_mac()
                     print(f'Attempt {attempt}/{max_attempts} - New MAC: {new_mac}')
 
                     try:
@@ -125,16 +150,16 @@ class NetworkManager:
                         time.sleep(3)
 
                         # Restart network services
-                        self.__restart_network()
+                        NetworkManager._restart_network()
 
                         # Renew DHCP
-                        self.__renew_dhcp(interface)
+                        NetworkManager._renew_dhcp(interface)
 
                         # Check connection with longer timeout
-                        if self.check_internet_connection(timeout=15):
+                        if NetworkManager.check_internet_connection(timeout=15):
                             print(
                                 'Connection successfully'
-                                + 'established using MAC: {new_mac}'
+                                + f'established using MAC: {new_mac}'
                             )
                             return True
 
@@ -152,10 +177,15 @@ class NetworkManager:
             print(f'Critical error: {str(e)}')
             return False
 
-
     @staticmethod
     def check_internet_connection(timeout: int = 10) -> bool:
-        """Improved connection check"""
+        """
+        Improved connection check
+
+        Args:
+
+            timeout (int): Maximum Standby Time.
+        """
         try:
             # Test both ping and DNS
             ping = subprocess.run(
@@ -175,9 +205,11 @@ class NetworkManager:
         except Exception:
             return False
 
-
     @staticmethod
     def _get_current_dns_server() -> list:
+        """
+        Picks up the system's current dns server.
+        """
         try:
             dns_servers = []
 

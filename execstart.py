@@ -13,6 +13,7 @@ os.environ['ROOT'] = CURRENTDIR
 
 
 try:
+    from src.filehelp import FileHelp
     from src.vpnhelp import VpnHelp
 
 except ImportError as e:
@@ -26,7 +27,7 @@ def main() -> None:
 
         vpn.stop()
 
-        server_file = vpn._get_random_server(SERVERS_DIR)
+        server_file = FileHelp.get_random_file(SERVERS_DIR)
 
         process = vpn.start(AUTH_FILE, server_file)
 
