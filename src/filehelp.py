@@ -1,22 +1,27 @@
 import os
 import subprocess
-
+import random
+from typing import Optional
 
 class FileHelp:
-    def __init__(self):
-        pass
+    """
+    A utility class for managing file attributes and content.
+    Provides methods to check, lock, unlock, and write to files,
+    as well as retrieve a random file from a directory.
+    """
 
-    @classmethod
-    def is_blocked(cls, path: str) -> bool:
+    @staticmethod
+    def is_blocked(path: str) -> bool:
         """
-        Checks if the file is loked for editing.
+        Checks if the file is locked for editing (immutable attribute set).
+        
+        :param path: Path to the file.
+        :return: True if the file is locked, False otherwise.
         """
         try:
-            # Check if path exists.
             if not os.path.exists(path):
-                raise Exception('File not found, please check the path and try again.')
+                raise FileNotFoundError(f"File '{path}' not found. Please check the path and try again.")
 
-            # Listing the file attributes.
             result = subprocess.run(
                 ['lsattr', path],
                 stdin=subprocess.PIPE,
@@ -24,82 +29,115 @@ class FileHelp:
                 text=True,
                 check=True,
             )
-
-            # If the file has 'i' attribute, it means that is locked for writing.
             return 'i' in result.stdout[:21]
 
-        except Exception:
-            # TODO: adding logs
-            print('Could not check status of the file: {err}')
-            return False
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+        except subprocess.SubprocessError:
+            print(f"Error: Unable to retrieve file attributes for '{path}'. Ensure 'lsattr' is available.")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        
+        return False
 
-    @classmethod
-    def block(cls, path: str) -> bool:
+    @staticmethod
+    def block(path: str) -> bool:
         """
-        Changes the file attribute to locked.
+        Locks the file by setting it as immutable.
+        
+        :param path: Path to the file.
+        :return: True if the operation was successful, False otherwise.
         """
         try:
-            # Check if path exists.
             if not os.path.exists(path):
-                raise Exception('File not found, please check the path and try again.')
+                raise FileNotFoundError(f"File '{path}' not found. Please check the path and try again.")
 
-            # Modify the file attribute.
-            subprocess.run(
-                ['sudo', 'chattr', '+i', path],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-                check=True,
-            )
+            subprocess.run(['sudo', 'chattr', '+i', path], check=True)
             return True
 
-        except Exception:
-            # TODO: adding loggin
-            print('Could not change the file attribute: {err}')
-            return False
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+        except subprocess.SubprocessError:
+            print(f"Error: Failed to lock file '{path}'. Ensure you have the required permissions.")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        
+        return False
 
-    @classmethod
-    def unblock(cls, path: str) -> bool:
+    @staticmethod
+    def unblock(path: str) -> bool:
         """
-        Changes the file attribute to unblock.
+        Unlocks the file by removing the immutable attribute.
+        
+        :param path: Path to the file.
+        :return: True if the operation was successful, False otherwise.
         """
         try:
-            # Check if path exists.
             if not os.path.exists(path):
-                raise Exception('File not found, please check the path and try again.')
+                raise FileNotFoundError(f"File '{path}' not found. Please check the path and try again.")
 
-            # Modify the file attribute.
-            subprocess.run(
-                ['sudo', 'chattr', '-i', path],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                text=True,
-                check=True,
-            )
+            subprocess.run(['sudo', 'chattr', '-i', path], check=True)
             return True
 
-        except Exception:
-            # TODO: adding loggin
-            print('Could not change the file attribute: {err}')
-            return False
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+        except subprocess.SubprocessError:
+            print(f"Error: Failed to unlock file '{path}'. Ensure you have the required permissions.")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        
+        return False
 
-    @classmethod
-    def write(cls, path: str, data: str) -> bool:
+    @staticmethod
+    def write(path: str, data: str) -> bool:
+        """
+        Writes data to a file. If the file is locked, it unlocks it before writing,
+        then re-locks it after writing.
+        
+        :param path: Path to the file.
+        :param data: Data to write into the file.
+        :return: True if the write operation was successful, False otherwise.
+        """
         try:
-            if cls.is_blocked(path):
-                cls.unblock(path)
+            if FileHelp.is_blocked(path):
+                FileHelp.unblock(path)
 
             with open(path, 'w') as file:
                 file.write(data)
-            cls.block(path)
+            
+            FileHelp.block(path)
             return True
 
-        except Exception as err:
-            print(f'Error: {err}')
-            return False
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+        except IOError:
+            print(f"Error: Unable to write to '{path}'. Check permissions and available space.")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        
+        return False
 
+    @staticmethod
+    def get_random_file(path: str) -> Optional[str]:
+        """
+        Retrieves a random file from the specified directory.
+        
+        :param path: Path to the directory.
+        :return: Path to a randomly selected file, or None if no files are found.
+        """
+        try:
+            if not os.path.exists(path) or not os.path.isdir(path):
+                raise FileNotFoundError(f"Directory '{path}' not found. Please check the path entered.")
 
-if __name__ == '__main__':
-    print(FileHelp.is_blocked('/etc/resolv.conf'))
-    FileHelp.block('/etc/resolv.conf')
-    print(FileHelp.is_blocked('/etc/resolv.conf'))
+            files = [os.path.join(path, f) for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+            if not files:
+                raise FileNotFoundError(f"No files found in the directory '{path}'.")
+
+            return random.choice(files)
+
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        
+        return None
