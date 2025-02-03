@@ -1,9 +1,12 @@
 [project]
 name = "vpnmanager"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.8"
+version = "1.0.0"
+description = "Stupid script to manage vpn"
+readme = { file = ".github/README.md", content-type = "text/markdown" }
+license = { file = "LICENSE" }
+authors = [{ name = "thiado-dev-cyber", email = "thiagof@tutamail.com" }]
+maintainers = [{ name = "thiado-dev-cyber", email = "thiagof@tutamail.com" }]
+requires-python = ">=3.10"
 dependencies = []
 
 [dependency-groups]
