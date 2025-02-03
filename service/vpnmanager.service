@@ -1,0 +1,17 @@
+[Unit]
+Description=Vpn Manager
+After=network.target
+
+
+[Service]
+User=root
+Group=root
+WorkingDirectory=/opt/vpnmanager
+ExecStart=/usr/bin/python3 /opt/vpnmanager/execstart.py
+ExecStop=/usr/bin/python3 /opt/vpnmanager/execstop.py
+Restart=on-failure
+RestartSec=5s
+Type=forking
+
+[Install]
+WantedBy=multi-user.target
