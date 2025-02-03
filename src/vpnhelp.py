@@ -143,8 +143,8 @@ class VpnHelp:
                         # Check connection with longer timeout
                         if self.check_internet_connection(timeout=15):
                             print(
-                                'Connection successfully' +
-                                'established using MAC: {new_mac}'
+                                'Connection successfully'
+                                + 'established using MAC: {new_mac}'
                             )
                             return True
 
@@ -290,11 +290,10 @@ class VpnHelp:
         self.is_active = False
         print('VPN stopped.')
 
-
-    def _get_random_server(self, path:str):
+    def _get_random_server(self, path: str):
         try:
             if not os.path.exists(path) or not os.path.isdir(path):
-                raise FileNotFoundError("Directory not found, check the path entered")
+                raise FileNotFoundError('Directory not found, check the path entered')
 
             if not self.server_pool:
                 servers = []
@@ -309,7 +308,5 @@ class VpnHelp:
             server_file = random.choice(self.server_pool)
             return server_file
 
-
         except Exception as err:
             print(err)
-            

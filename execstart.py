@@ -13,37 +13,36 @@ os.environ['ROOT'] = CURRENTDIR
 
 
 try:
-	from src.vpnhelp import VpnHelp
+    from src.vpnhelp import VpnHelp
 
 except ImportError as e:
-	print(f"Error: {e}")
-	sys.exit(1)
+    print(f'Error: {e}')
+    sys.exit(1)
 
 
 def main() -> None:
-	try: 
-		vpn = VpnHelp()
+    try:
+        vpn = VpnHelp()
 
-		vpn.stop()
+        vpn.stop()
 
-		server_file = vpn._get_random_server(SERVERS_DIR)
+        server_file = vpn._get_random_server(SERVERS_DIR)
 
-		process = vpn.start(AUTH_FILE, server_file)
+        process = vpn.start(AUTH_FILE, server_file)
 
-		if process and process.pid:
-			with open(PID_FILE, 'w') as f:
-				f.write(str(process.pid))
-			print(f"Server start with PID: {process.pid}")
+        if process and process.pid:
+            with open(PID_FILE, 'w') as f:
+                f.write(str(process.pid))
+            print(f'Server start with PID: {process.pid}')
 
-		else:
-			print(f"Fail")
-			sys.exit(1)
+        else:
+            print('Fail')
+            sys.exit(1)
 
-	except Exception as err:
-		print(f"Error {err}")
-		sys.exit(1)
+    except Exception as err:
+        print(f'Error {err}')
+        sys.exit(1)
 
 
-if __name__ == "__main__":
-	main()
-
+if __name__ == '__main__':
+    main()
