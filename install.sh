@@ -33,6 +33,13 @@ if [ ! -d "${DEST_DIR}" ]; then
   check_errors "Failed to create directory ${DEST_DIR}"
 fi
 
+# Create directory for iptables backup.
+if [ ! -d "/etc/iptables" ]; then
+  mkdir "/etc/iptables"
+  check_errors "Failed to create directory /etc/iptables"
+fi
+
+
 # Create the configuration directory if it does not exist.
 if [ ! -d "${CONFIG_DIR}" ]; then
   echo -e "${GREEN}[+] Creating directory ${CONFIG_DIR}.${RESET}"
