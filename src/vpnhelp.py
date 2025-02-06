@@ -44,6 +44,7 @@ class VpnHelp:
         self.auth_file = auth_file
         self.config_file = config_file
 
+        NetworkManager.disable_kill_switch()
         for attempt in range(3):
             try:
                 NetworkManager.new_mac_address()
@@ -72,6 +73,8 @@ class VpnHelp:
                 time.sleep(10)
                 if NetworkManager.check_internet_connection():
                     print('VPN started successfully.')
+
+                    NetworkManager.enable_kill_switch()
                     self.is_active = True
                     return self.openvpn_process
                 else:
@@ -94,6 +97,8 @@ class VpnHelp:
         """
         Terminates the connection to the vpn server and kills the process.
         """
+
+        NetworkManager.disable_kill_switch()
         if self.openvpn_process:
             self.openvpn_process.terminate()
             try:

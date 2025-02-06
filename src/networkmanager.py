@@ -1,5 +1,6 @@
 import random
 import subprocess
+import sys
 import time
 
 
@@ -222,3 +223,63 @@ class NetworkManager:
             print(f'Error reading DNS config: {err}')
 
         return list(set(dns_servers))
+
+    @staticmethod
+    def enable_kill_switch():
+        """
+        Enable kill switch with iptables firewall
+        """
+        try:
+            # backup current iptables config.
+            subprocess.run(
+                'iptables-save > /etc/iptables/iptables_backup', shell=True, check=True
+            )
+
+            # Warning del current iptables config.
+            subprocess.run(['iptables', '--flush'], check=True)
+            subprocess.run(['iptables', '--delete-chain'], check=True)
+
+            subprocess.run(
+                ['iptables', '-A', 'OUTPUT', '-o', 'lo', '-j', 'ACCEPT'], check=True
+            )
+            subprocess.run(
+                [
+                    'iptables',
+                    '-A',
+                    'OUTPUT',
+                    '-m',
+                    'conntrack',
+                    '--ctstate',
+                    'ESTABLISHED,RELATED',
+                    '-j',
+                    'ACCEPT',
+                ],
+                check=True,
+            )
+
+            subprocess.run(
+                ['iptables', '-A', 'OUTPUT', '-o', 'tun0', '-j', 'ACCEPT'], check=True
+            )
+
+            subprocess.run(['iptables', '-P', 'OUTPUT', 'DROP'], check=True)
+
+            print('Kill switch enable.')
+
+        except subprocess.CalledProcessError as e:
+            print(f'Error to config iptables: {e}')
+            sys.exit(1)
+
+    @staticmethod
+    def disable_kill_switch():
+        """
+        Disable killswitch
+        """
+        try:
+            subprocess.run(
+                'iptables-restore < /etc/iptables/iptables_backup',
+                shell=True,
+                check=True,
+            )
+            print('Kill switch disable.')
+        except subprocess.CalledProcessError as e:
+            print(f'Error to restuart iptables: {e}')
