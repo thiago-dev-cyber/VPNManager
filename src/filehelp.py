@@ -71,7 +71,7 @@ class FileHelp:
                     f"File '{path}' not found. Please check the path and try again."
                 )
 
-            subprocess.run(['sudo', 'chattr', '+i', path], check=True)
+            subprocess.run(['chattr', '+i', path], check=True)
             return True
 
         except FileNotFoundError as e:
@@ -105,7 +105,7 @@ class FileHelp:
                     f"File '{path}' not found. Please check the path and try again."
                 )
 
-            subprocess.run(['sudo', 'chattr', '-i', path], check=True)
+            subprocess.run(['chattr', '-i', path], check=True)
             return True
 
         except FileNotFoundError as e:

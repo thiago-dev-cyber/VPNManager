@@ -15,6 +15,6 @@ class ProcessHelp:
             process_name (str): Name of the process that will be closed.
         """
         try:
-            subprocess.run(['sudo', 'killall', process_name], check=True)
+            subprocess.run(['sudo', 'pkill', process_name], check=True)
         except subprocess.CalledProcessError:
             print(f'It was not possible to close the process {process_name}')

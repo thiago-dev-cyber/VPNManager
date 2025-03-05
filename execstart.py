@@ -17,18 +17,16 @@ try:
     from src.vpnhelp import VpnHelp
 
 except ImportError as e:
-    print(f'Error: {e}')
+    print(f'Importation error: {e}')
     sys.exit(1)
 
 
 def main() -> None:
     try:
         vpn = VpnHelp()
-
         vpn.stop()
 
         server_file = FileHelp.get_random_file(SERVERS_DIR)
-
         process = vpn.start(AUTH_FILE, server_file)
 
         if process and process.pid:

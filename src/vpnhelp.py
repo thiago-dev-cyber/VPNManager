@@ -21,8 +21,8 @@ class VpnHelp:
         self.is_active = False
         self.auth_file = None
         self.config_file = None
-        self.system_dns = ['127.0.2.1']
-        self.vpn_dns = ['1.1.1.1', '8.8.4.4\n']
+        self.system_dns = ['127.0.2.1\n']
+        self.vpn_dns = ['1.1.1.1\n', '8.8.4.4\n']
         self.openvpn_process = None
         self.server_pool = []
 
@@ -111,7 +111,7 @@ class VpnHelp:
             dns_content = '\n'.join([f'nameserver {dns}' for dns in self.system_dns])
             FileHelp.write('/etc/resolv.conf', dns_content)
         else:
-            FileHelp.write('/etc/resolv.conf', 'nameserver 1.1.1.1\n')  # Fallback
+            FileHelp.write('/etc/resolv.conf', 'nameserver 1.1.1.1\n\n')  # Fallback
 
         try:
             ProcessHelp._finish_process('openvpn')

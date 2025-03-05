@@ -283,3 +283,8 @@ class NetworkManager:
             print('Kill switch disable.')
         except subprocess.CalledProcessError as e:
             print(f'Error to restuart iptables: {e}')
+            print('Triggering the fallback')
+
+            subprocess.run(['iptables', '--flush'], check=True)
+            subprocess.run(['iptables', '--delete-chain'], check=True)
+            subprocess.run(['iptables', '-P', 'OUTPUT', 'ACCEPT'], check=True)
